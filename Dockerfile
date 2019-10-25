@@ -3,6 +3,7 @@ FROM tensorflow_detection:0.0.1
 
 RUN pip install sagemaker-containers
 
+COPY object_detection/model_main.py object_detection/model_main.py
 COPY ocr_label_map.pbtxt ocr_label_map.pbtxt
 
 COPY pretrained.ckpt.index  pretrained.ckpt.index
