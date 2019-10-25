@@ -1,4 +1,4 @@
-FROM ssoonan0770/tensorflow_object_detection_1.12.0
+FROM tensorflow_detection:0.0.1
 # FROM tensorflow_detection:0.0.1-cpu
 
 RUN pip install sagemaker-containers
