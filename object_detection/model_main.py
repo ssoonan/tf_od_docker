@@ -25,10 +25,13 @@ import tensorflow as tf
 from object_detection import model_hparams
 from object_detection import model_lib
 
+tf.logging.set_verbosity(tf.logging.INFO)
+
 flags.DEFINE_string(
-    'model_dir', None, 'Path to output model directory '
+    'model_dir', '/opt/ml/model', 'Path to output model directory '
     'where event and checkpoint files will be written.')
-flags.DEFINE_string('pipeline_config_path', None, 'Path to pipeline config '
+# 여기서 default pipeline config 정의
+flags.DEFINE_string('pipeline_config_path', 'pipeline.config', 'Path to pipeline config '
                     'file.')
 flags.DEFINE_integer('num_train_steps', None, 'Number of train steps.')
 flags.DEFINE_boolean('eval_training_data', False,
