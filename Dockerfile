@@ -20,7 +20,7 @@ RUN git clone git@github.com:ssoonan/tf_od_docker.git
 
 FROM tensorflow/tensorflow:1.12.0-gpu-py3
 # copy the repository form the previous image
-COPY --from=intermediate /tensorflow_object_detection /opt/ml/code
+COPY --from=intermediate /tf_od_docker /opt/ml/code
 
 RUN apt-get update && apt-get install -y \
   git protobuf-compiler
