@@ -14,7 +14,7 @@ RUN chmod 600 /root/.ssh/id_rsa
 RUN touch /root/.ssh/known_hosts
 RUN ssh-keyscan github.com >> /root/.ssh/known_hosts
 
-RUN git clone git@github.com:ssoonan/tensorflow_object_detection.git
+RUN git clone git@github.com:ssoonan/tf_od_docker.git
 
 ##----------- github ssh part end----------
 

@@ -1,20 +1,43 @@
-FROM tensorflow_detection:0.0.1
-# FROM tensorflow_detection:0.0.1-cpu
+FROM ubuntu:16.04 as intermediate
 
-RUN pip install sagemaker-containers
+# install git
+RUN apt update
+RUN apt install -y git
 
-COPY object_detection/model_main.py object_detection/model_main.py
-COPY ocr_label_map.pbtxt ocr_label_map.pbtxt
+# add credentials on build
+ARG SSH_PRIVATE_KEY
+RUN mkdir /root/.ssh/
+RUN echo "${SSH_PRIVATE_KEY}" > /root/.ssh/id_rsa
+RUN chmod 600 /root/.ssh/id_rsa
 
-COPY pretrained.ckpt.index  pretrained.ckpt.index
-COPY pretrained.ckpt.meta  pretrained.ckpt.meta
-COPY pretrained.ckpt.data-00000-of-00001  pretrained.ckpt.data-00000-of-00001
+# # make sure your domain is accepted
+RUN touch /root/.ssh/known_hosts
+RUN ssh-keyscan github.com >> /root/.ssh/known_hosts
 
-COPY pipeline.config pipeline.config
+RUN git clone git@github.com:ssoonan/tf_od_docker.git
 
+##----------- github ssh part end----------
 
-ENV PATH="/opt/ml/code:${PATH}"
-ENV PYTHONPATH=:/opt/ml/code:/opt/ml/code/slim
+FROM tensorflow/tensorflow:1.12.0-gpu-py3
+# copy the repository form the previous image
+COPY --from=intermediate /tensorflow_object_detection /opt/ml/code
 
-ENV SAGEMAKER_PROGRAM object_detection.model_main.py
+RUN apt-get update && apt-get install -y \
+  git protobuf-compiler
 
+RUN curl -OL https://github.com/google/protobuf/releases/download/v3.2.0/protoc-3.2.0-linux-x86_64.zip
+RUN unzip protoc-3.2.0-linux-x86_64.zip -d protoc3
+RUN mv protoc3/bin/* /usr/local/bin/
+RUN mv protoc3/include/* /usr/local/include/
+
+WORKDIR /opt/ml/code/
+
+RUN pip install --user Cython contextlib2 pillow lxml jupyter matplotlib
+
+RUN protoc object_detection/protos/*.proto --python_out=.
+RUN echo "export PYTHONPATH=${PYTHONPATH}:`pwd`:`pwd`/slim" >> ~/.bashrc
+RUN python setup.py install
+
+# coco api install
+RUN git clone https://github.com/cocodataset/cocoapi.git
+RUN cd cocoapi/PythonAPI &&  make && cp -r pycocotools /opt/ml/code
