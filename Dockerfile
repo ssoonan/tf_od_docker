@@ -24,3 +24,7 @@ RUN python setup.py install
 
 # coco api install
 RUN pip install git+https://github.com/philferriere/cocoapi.git#subdirectory=PythonAPI
+
+ENV PYTHONPATH=:/opt/ml/code:/opt/ml/code/slim
+
+ENTRYPOINT  ["python", "object_detection/model_main.py"]
